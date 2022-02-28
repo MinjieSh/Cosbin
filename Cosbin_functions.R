@@ -1,15 +1,19 @@
-########################## main function
+#' Normalize data (in super sample) using Cosbin algorithm
+#' 
+#' @param data data (super sample: mean of each group).
+#' @return a list contains normalized data and normalization factor.
+#' @examples
+#' cosbin(data)
 cosbin <- function(data){
   result <- data
   row.names(result) <- 1:nrow(result)
   
-  # Step 1 identify sDEG
+  # Step 1: identify sDEG
   # mycosine(c(1, 0,0), c(1, 1, 1)) = 0.5773503
   # solve 0.5773503 = 0.99 * x - sin(arccos(x)) * sin(arccos(0.99))
-  # cos(arccos(0.5773503) - arccos(0.99))
   
-  #threshold <- 0.686758
-  threshold <- 0.728284
+  #threshold <- 0.686758 #cos(arccos(0.5773503) - arccos(0.99))
+  threshold <- 0.728284 #cos(arccos(0.5773503) - arccos(0.98))
   
   while(max(cos_iDEG(result)) >= threshold){
     temp_sDEG_ind <- which.max(cos_iDEG(result))
@@ -17,9 +21,8 @@ cosbin <- function(data){
     result <- apply(result, 2, function(x) x / sum(x))
   }
   print(dim(result))
-  # View(result)
   
-  # STEP 2 identify CEG, normalize based on CEG
+  # STEP 2: identify CEG, normalize based on CEG
   # converge: # not change
   while(length(which(cos_iCEG(result) >= 0.98)) != dim(result)[1]){
     temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
@@ -30,7 +33,7 @@ cosbin <- function(data){
   print(dim(result))
   # View(result)
   
-  # Final step normalization
+  # Final step: normalization
   ind <- as.numeric(row.names(result))
   scalar <- colMeans(data[ind, ] / result)
   print(scalar)
@@ -41,66 +44,15 @@ cosbin <- function(data){
   return(list(data = data, norm_factor = scalar))
 }
 
-########################## helper functions
-mycosine <- function(A, B){
-  return(sum(A*B)/sqrt(sum(A^2)*sum(B^2)))
-}
-
-cos_ref <- function(data, ref){
-  gene <- dim(data)[1]
-  smp <- dim(data)[2]
-  
-  res <- array(0, dim = gene)
-  for(i in 1:gene){
-    res[i] <- mycosine(ref, data[i, ])
-  }
-  return(res)
-}
-
-cos_iCEG <- function(data){
-  gene <- dim(data)[1]
-  smp <- dim(data)[2]
-  
-  ref <- rep(1, smp)
-  
-  res <- array(0, dim = gene)
-  for(i in 1:gene){
-    res[i] <- mycosine(ref, data[i, ])
-  }
-  return(res)
-}
-
-
-cos_iDEG <- function(data){
-  gene <- dim(data)[1]
-  smp <- dim(data)[2]
-  
-  ref <- vector("list", length = smp)
-  for(i in 1:smp){
-    ref[[i]] <- rep(0, smp)
-    ref[[i]][i] <- 1
-  }
-  
-  res <- array(0, dim = gene)
-  
-  for(i in 1:gene){
-    temp <- NULL
-    for(j in 1:smp){
-      temp <- c(temp, mycosine(ref[[j]], data[i, ])) 
-    }
-    res[i] <- max(temp)
-  }
-  return(res)
-}
-
-totalcount <- function(data){
-  scalar <- colSums(data)
-  data <- apply(data, 2, function(x)
-    x / sum(x)) * mean(colSums(data))
-  
-  return(list(data = data, norm_factor = scalar))
-}
-################################## super sample -> sample
+#' convert the normalized data (in super sample) to the correct scale (with replicates)
+#' 
+#' @param cosbin_out normalized data, output of the cosbin function
+#' @param data2 original data (with replicates, not in super sample)
+#' @param nGroup number of group, e.g. 3
+#' @param nRep number of replicates in each group, e.g. c(10,20,30)
+#' @return final normalization results
+#' @examples
+#' cosbin_convert(cosbin_out, original_data, 3, c(10, 20, 30))
 cosbin_convert <- function(cosbin_out, data2, nGroup, nRep){
   group_factor <- cosbin_out$norm_factor / cosbin_out$norm_factor[1]
   
@@ -128,4 +80,69 @@ cosbin_convert <- function(cosbin_out, data2, nGroup, nRep){
   data_norm <-  t(apply(data_norm, 1, function(x) x / sum(x))) * mean(nRep)
   
   return(data_norm)
+}
+
+
+########################## helper functions
+#' Calculate the cosine between vector A and vector B 
+mycosine <- function(A, B){
+  return(sum(A*B)/sqrt(sum(A^2)*sum(B^2)))
+}
+
+#' Calculate the cosine between data and reference vector 
+cos_ref <- function(data, ref){
+  gene <- dim(data)[1]
+  smp <- dim(data)[2]
+  
+  res <- array(0, dim = gene)
+  for(i in 1:gene){
+    res[i] <- mycosine(ref, data[i, ])
+  }
+  return(res)
+}
+
+#' Calculate the cosine between data and CEG reference, e.g. c(1, 1, 1)
+cos_iCEG <- function(data){
+  gene <- dim(data)[1]
+  smp <- dim(data)[2]
+  
+  ref <- rep(1, smp)
+  
+  res <- array(0, dim = gene)
+  for(i in 1:gene){
+    res[i] <- mycosine(ref, data[i, ])
+  }
+  return(res)
+}
+
+#' Calculate the cosine between data and closest iDEG reference, e.g. c(1, 0, 0)
+cos_iDEG <- function(data){
+  gene <- dim(data)[1]
+  smp <- dim(data)[2]
+  
+  ref <- vector("list", length = smp)
+  for(i in 1:smp){
+    ref[[i]] <- rep(0, smp)
+    ref[[i]][i] <- 1
+  }
+  
+  res <- array(0, dim = gene)
+  
+  for(i in 1:gene){
+    temp <- NULL
+    for(j in 1:smp){
+      temp <- c(temp, mycosine(ref[[j]], data[i, ])) 
+    }
+    res[i] <- max(temp)
+  }
+  return(res)
+}
+
+#' total count normalization
+totalcount <- function(data){
+  scalar <- colSums(data)
+  data <- apply(data, 2, function(x)
+    x / sum(x)) * mean(colSums(data))
+  
+  return(list(data = data, norm_factor = scalar))
 }
