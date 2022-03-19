@@ -17,7 +17,7 @@ cosbin <- function(data) {
   
   while (max(cos_iDEG(result)) >= threshold) {
     temp_sDEG_ind <- which.max(cos_iDEG(result))
-    result <- result[-temp_sDEG_ind,]
+    result <- result[-temp_sDEG_ind, ]
     result <- apply(result, 2, function(x)
       x / sum(x))
   }
@@ -27,7 +27,7 @@ cosbin <- function(data) {
   # converge: # not change
   while (length(which(cos_iCEG(result) >= 0.98)) != dim(result)[1]) {
     temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
-    result <- result[temp_CEG_ind, ]
+    result <- result[temp_CEG_ind,]
     result <- apply(result, 2, function(x)
       x / sum(x))
     # print(dim(result))
@@ -37,7 +37,7 @@ cosbin <- function(data) {
   
   # Final step: normalization
   ind <- as.numeric(row.names(result))
-  scalar <- colMeans(data[ind,] / result)
+  scalar <- colMeans(data[ind, ] / result)
   print(scalar)
   for (i in 1:ncol(data)) {
     data[, i] <- data[, i] / scalar[i]
@@ -102,7 +102,7 @@ cos_ref <- function(data, ref) {
   
   res <- array(0, dim = gene)
   for (i in 1:gene) {
-    res[i] <- mycosine(ref, data[i,])
+    res[i] <- mycosine(ref, data[i, ])
   }
   return(res)
 }
@@ -116,7 +116,7 @@ cos_iCEG <- function(data) {
   
   res <- array(0, dim = gene)
   for (i in 1:gene) {
-    res[i] <- mycosine(ref, data[i,])
+    res[i] <- mycosine(ref, data[i, ])
   }
   return(res)
 }
@@ -137,7 +137,7 @@ cos_iDEG <- function(data) {
   for (i in 1:gene) {
     temp <- NULL
     for (j in 1:smp) {
-      temp <- c(temp, mycosine(ref[[j]], data[i,]))
+      temp <- c(temp, mycosine(ref[[j]], data[i, ]))
     }
     res[i] <- max(temp)
   }
@@ -174,7 +174,8 @@ plot_3d_data <- function(plot_data, label, group, color_options) {
          type = "p",
          r = 0.2)
   # play3d(spin3d(axis = c(0, 0, 1), rpm = 20), duration = 10)
-  
+
+  # you have to create a subfolder under your working directory called 3dplot before running this
   # movie3d(
   #   movie="rotate",
   #   spin3d( axis = c(0, 0, 1), rpm = 7),
@@ -183,6 +184,8 @@ plot_3d_data <- function(plot_data, label, group, color_options) {
   #   clean = TRUE,
   #   dir = file.path(getwd(), "3dplot")
   # )
+  
+  dev.off()
 }
 
 # Example:
@@ -195,12 +198,12 @@ plot_ternary_data_deprecated <-
         x / sum(x)))
     
     p <- ggtern(data = as.data.frame(plot_data),
-           aes(
-             x = plot_data[, 1],
-             y = plot_data[, 2],
-             z = plot_data[, 3],
-             color = label
-           )) +
+                aes(
+                  x = plot_data[, 1],
+                  y = plot_data[, 2],
+                  z = plot_data[, 3],
+                  color = label
+                )) +
       geom_point() +
       labs(x = "Group 1",
            y = "Group 2",
@@ -214,6 +217,7 @@ plot_ternary_data_deprecated <-
         strip.text.x = element_blank(),
         strip.text.y = element_blank()
       )
+    
     return(p)
     
   }
@@ -238,4 +242,6 @@ plot_ternary_data <-
                  pch = 16,
                  cex = .8,
                  col = color)
+    
+    dev.off()
   }
