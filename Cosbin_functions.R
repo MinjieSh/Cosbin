@@ -18,8 +18,7 @@ cosbin <- function(data) {
   while (max(cos_iDEG(result)) >= threshold) {
     temp_sDEG_ind <- which.max(cos_iDEG(result))
     result <- result[-temp_sDEG_ind, ]
-    result <- apply(result, 2, function(x)
-      x / sum(x))
+    result <- totalcount(result)$data
   }
   print(dim(result))
   
@@ -28,8 +27,7 @@ cosbin <- function(data) {
   while (length(which(cos_iCEG(result) >= 0.98)) != dim(result)[1]) {
     temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
     result <- result[temp_CEG_ind,]
-    result <- apply(result, 2, function(x)
-      x / sum(x))
+    result <- totalcount(result)$data
     # print(dim(result))
   }
   print(dim(result))
@@ -43,7 +41,7 @@ cosbin <- function(data) {
     data[, i] <- data[, i] / scalar[i]
   }
   
-  return(list(data = data, norm_factor = scalar))
+  return(list(data = data, norm_factor = scalar, CEG_index = ind))
 }
 
 #' convert the normalized data (in super sample) to the correct scale (with replicates)

@@ -115,7 +115,7 @@ data2 <- abs(data2 + noise)
 data_grnd <- NULL
 start <- 1
 for(rep in nRep){
-  data_grnd <- cbind(data_grnd, rowMeans(data2[, start : (start + rep - 1)]))
+  data_grnd <- cbind(data_grnd, rowMeans(data2[, start : (start + rep - 1)])) # a group has to have more than 1 sample to make this code work
   start <- start + rep
 }
 
