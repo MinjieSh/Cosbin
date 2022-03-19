@@ -187,8 +187,8 @@ plot_3d_data <- function(plot_data, label, group, color_options) {
 
 # Example:
 # ggtern is no longer availble in current version
-# plot_ternay_data_deprecated(data_grnd, lbl2, c("blue", "green", "magenta", "orange", "red"))
-plot_ternay_data_deprecated <-
+# plot_ternary_data_deprecated(data_grnd, lbl2, c("blue", "green", "magenta", "orange", "red"))
+plot_ternary_data_deprecated <-
   function(plot_data, label, color_options) {
     plot_data <-
       t(apply(plot_data, 1, function(x)
@@ -220,8 +220,8 @@ plot_ternay_data_deprecated <-
 
 
 # Example:
-# plot_ternay_data(data_grnd, lbl2, c("blue", "green", "magenta", "orange", "red"))
-plot_ternay_data <-
+# plot_ternary_data(data_grnd, lbl2, c("blue", "green", "magenta", "orange", "red"))
+plot_ternary_data <-
   function(plot_data, label, group, color_options) {
     plot_data <-
       t(apply(plot_data, 1, function(x)

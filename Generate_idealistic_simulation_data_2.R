@@ -162,9 +162,6 @@ for (i in 1:nGroup) {
 # CEG_grnd[(nGene-piCEG+1) : nGene] <- 1
 # sum(CEG_grnd) # 800 (10%)
 
-#######################################################
-
-
 #############################################
 group <- c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "DEG (exclude sDEG) G1", "DEG (exclude sDEG) G2", "DEG (exclude sDEG) G3")
 color_options <- c("magenta", "orange", "red", "green4", "royalblue", "lightseagreen","slateblue")
@@ -176,8 +173,8 @@ plot_3d_data(data_grnd, lbl2,
 plot_3d_data(data3, lbl2, 
              group, color_options)
 
-plot_ternay_data(data_grnd, lbl2, group, color_options)
-plot_ternay_data(data3, lbl2, group, color_options)
+plot_ternary_data(data_grnd, lbl2, group, color_options)
+plot_ternary_data(data3, lbl2, group, color_options)
 
 ###########################################################
 

@@ -145,8 +145,8 @@ for(rep in nRep){
 
 plot_3d_data(data3, lbl2, c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green4", "steelblue1"))
 
-plot_ternay_data(data_grnd, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
-plot_ternay_data(data3, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
+plot_ternary_data(data_grnd, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
+plot_ternary_data(data3, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
 
 ###########################################################
 
