@@ -1,5 +1,5 @@
+#library(ggtern)
 library(Ternary)
-library(ggtern)
 library(hrbrthemes)
 library(ggplot2)
 library(DirichletReg)
@@ -20,7 +20,7 @@ set.seed(17)
 nGroup <- 3
 nGene <- 8 * 1000
 
-############# 10%
+############# 10% iCEG = center (1,1,1) + noise
 
 piCEG <- 0.1 * nGene
 data_iCEG <-
@@ -29,7 +29,7 @@ noise <- rnorm(nGroup * piCEG, mean = 0, sd = 0.05)
 data_iCEG <- data_iCEG + noise
 
 
-#############
+############# 225 SDEGs (corner, 50 + 75 + 100)
 
 pSMG <-  c(50, 75, 100) 
 ref <- vector("list", length = nGroup)
@@ -45,7 +45,7 @@ for (i in 1:nGroup) {
 noise <- rnorm(nGroup * sum(pSMG), mean = 0, sd = 0.05)
 data_SMG <- abs(data_SMG + noise)
 
-#############
+############# the rest: dirichlet
 
 alpha <- list(c(10, 3.5, 3.5), c(3.5, 10, 3.5), c(3.5, 3.5, 10))
 pDEG <- NULL
@@ -58,13 +58,13 @@ for (i in 1:nGroup) {
     rbind(data_DEG, rdirichlet(pDEG[i], alpha[[i]]))
 }
 
-#############
+############# 8000 Genes, 3 Groups
 
 data <- rbind(data_SMG, data_DEG, data_iCEG)
 
 ####################################################
 
-# Add replicates
+############# Add replicates
 nRep <- rep(10, nGroup)
 
 data2 <- NULL
@@ -72,33 +72,35 @@ for (i in 1:nGroup) {
   data2 <-
     cbind(data2, matrix(rep(data[, i], nRep[i]), ncol = nRep[i], byrow = FALSE))
 }
-dim(data2)
+############ dim(data2)  8000 Genes, 3 Groups, 10 replicates for each group
+
 noise <- rnorm(nRep * nGroup * nGene, mean = 0, sd = 0.01)
 data2 <- abs(data2 + noise)
 
 
-# #### modify the rowSums
+##### modify the rowSums (OPTIONAL)
 
+### Cosbin rowsum
 # for(i in 1:nGene){
 #   data2[i,] <- data2[i,] * 1000
 # }
 
-data_TCC <- simulateReadCounts(Ngene = nGene, PDEG = 1 - (piCEG / nGene),
-                               DEG.assign = pSMG / sum(pSMG),
-                               DEG.foldchange = rep(10, nGroup),
-                               replicates = nRep)
-rs <- rowSums(data_TCC$count)
-move <- c(seq(1,50), 1600 + seq(1,75), 4000 + seq(1, 100))
-temp <- rs[move]
-rs <- c(temp, rs[-move])
-ind <- which(rs < 10000)
-# ind <- 1:nGene
-for(i in ind){
-  data2[i,] <- data2[i,] * rs[i]
-}
+### TCC rowsum
+# data_TCC <- simulateReadCounts(Ngene = nGene, PDEG = 1 - (piCEG / nGene),
+#                                DEG.assign = pSMG / sum(pSMG),
+#                                DEG.foldchange = rep(10, nGroup),
+#                                replicates = nRep)
+# rs <- rowSums(data_TCC$count)
+# move <- c(seq(1,50), 1600 + seq(1,75), 4000 + seq(1, 100))
+# temp <- rs[move]
+# rs <- c(temp, rs[-move])
+# ind <- which(rs < 10000)
+# # ind <- 1:nGene
+# for(i in ind){
+#   data2[i,] <- data2[i,] * rs[i]
+# }
 
-
-
+############ data2 -> super sample -> ground truth
 
 data_grnd <- NULL
 start <- 1
@@ -107,11 +109,11 @@ for(rep in nRep){
   start <- start + rep
 }
 
-#################
+################# use total count to alter the data
 
 data2 <- totalcount(data2)$data
 
-#### within group mean
+#### get super sample (average of each group), data3 is the final input
 data3 <- NULL
 start <- 1
 for(rep in nRep){
@@ -120,8 +122,7 @@ for(rep in nRep){
 }
 
 
-#################
-
+################# get labels
 
 lbl <- rep(0, nGene)
 lbl[1:sum(pSMG)] <- 'sDEG'
@@ -139,46 +140,34 @@ for (i in 1:nGroup) {
   start <- start + pDEG[[i]]
 }
 
-SMG_grnd <- rep(0, nGene)
-SMG_grnd[1:sum(pSMG)] <- 1
-sum(SMG_grnd)
+# SMG_grnd <- rep(0, nGene)
+# SMG_grnd[1:sum(pSMG)] <- 1
+# sum(SMG_grnd) # 225
+# 
+# DEG_grnd <- rep(0, nGene)
+# DEG_grnd[(sum(pSMG) + 1) : (nGene-piCEG)] <- 1
+# sum(DEG_grnd) # 6975
+# 
+# CEG_grnd <- rep(0, nGene)
+# CEG_grnd[(nGene-piCEG+1) : nGene] <- 1
+# sum(CEG_grnd) # 800 (10%)
 
-DEG_grnd <- rep(0, nGene)
-DEG_grnd[(sum(pSMG) + 1) : (nGene-piCEG)] <- 1
-sum(DEG_grnd)
-
-CEG_grnd <- rep(0, nGene)
-CEG_grnd[(nGene-piCEG+1) : nGene] <- 1
-sum(CEG_grnd)
 #######################################################
 
 
 #############################################
-
-test <- data_grnd
-coltemp <- lbl2
-
-coltemp[coltemp == 'sDEG G1'] <- "magenta"
-coltemp[coltemp == 'sDEG G2'] <- "orange"
-coltemp[coltemp == 'sDEG G3'] <- "red"
-coltemp[coltemp == 'iCEG (labeled)'] <- "green4"
-
-coltemp[coltemp == 'DEG (exclude sDEG) G1'] <- "royalblue"
-coltemp[coltemp == 'DEG (exclude sDEG) G2'] <- "lightseagreen"
-coltemp[coltemp == 'DEG (exclude sDEG) G3'] <- "slateblue"
-
-G1 <- test[,1]
-G2 <- test[,2]
-G3 <- test[,3]
-plot3d( G1, G2, G3, col = coltemp, type = "p", r = 0.2)
-
+group <- c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "DEG (exclude sDEG) G1", "DEG (exclude sDEG) G2", "DEG (exclude sDEG) G3")
+color_options <- c("magenta", "orange", "red", "green4", "royalblue", "lightseagreen","slateblue")
+plot_3d_data(data_grnd, lbl2, 
+             group, color_options)
 
 #################
 
-plot_data <- data_grnd
-plot_data <- data3
+plot_3d_data(data3, lbl2, 
+             group, color_options)
 
-
+plot_ternay_data(data_grnd, lbl2, group, color_options)
+plot_ternay_data(data3, lbl2, group, color_options)
 
 ###########################################################
 
@@ -186,15 +175,14 @@ sum(CEG_grnd)
 length(which(cos_iCEG(data3) >= 0.99))
 length(which(cos_iCEG(data3) >= 0.98))
 
-
 ###########################################################
 
 # ind_CEG <- which(cos_iCEG(data_grnd) >= 0.98)
-# length(ind_CEG) 
+# length(ind_CEG)
 # length(ind_CEG) / nGene
 # 
 # ind_SMG <- which(cos_iDEG(data_grnd) >= 0.99)
-# length(ind_SMG) 
+# length(ind_SMG)
 # length(ind_SMG) / nGene
 # 
 # ind_neither <- intersect(which(cos_iCEG(data_grnd) < 0.98),

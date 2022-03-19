@@ -1,12 +1,17 @@
-setwd("C:/Users/Minjie Shen/Google Drive/inCOT simulation")
+setwd("E:/Cosbin")
+
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# BiocManager::install("TCC")
+
+# if (!require('devtools')) install.packages('devtools')
+# install_github('ms609/Ternary')
 
 ###### Prepare - install packages - R 3.6.3
 
-# remove.packages("rlang")
-# install.packages("rlang", INSTALL_opts = "--no-lock")
-library(rlang)
+#library(ggtern) # https://rpubs.com/tskam/ternary_plot
 library(Ternary)
-library(ggtern)
 library(hrbrthemes)
 library(DirichletReg)
 library(DescTools)
@@ -16,7 +21,7 @@ library(scales)
 library(devEMF)
 library(rgl)
 library(magick)
-# devtools::install_version("ggplot2", version = "3.2.1", repos = "http://cran.us.r-project.org", type="source")
+library(ggplot2)
 
 source('Cosbin_functions.R')
 
@@ -38,7 +43,7 @@ for (i in 1:nGroup) {
 
 non_DEG <- rdirichlet(400, rep(3, nGroup))
 
-###### iDEG
+###### iDEG: corner
 data_sDEG <- NULL
 for (i in 1:nGroup) {
   data_sDEG <-
@@ -67,7 +72,7 @@ for (i in 1:nGroup) {
     cbind(data2, matrix(rep(data[, i], nRep[i]), ncol = nRep[i], byrow = FALSE))
 }
 
-dim(data2)
+# dim(data2) ## 1000 * 30; 10 replicates for each group
 noise <- rnorm(nRep * nGroup * nGene, mean = 0, sd = 0.01)
 data2 <- abs(data2 + noise)
 
@@ -78,6 +83,8 @@ for(i in 1:nGene){
 }
 
 #### Ground truth data (super sample, to be compared with the normalized result)
+#### data2 -> super sample: ground truth
+#### data2 vs data3 (input for Cosbin)
 data_grnd <- NULL
 start <- 1
 for(rep in nRep){
@@ -107,6 +114,7 @@ for (i in 1:nGroup) {
 }
 
 ###### Ground truth label
+
 CEG_grnd <- rep(0, nGene)
 CEG_grnd[ind_CEG] <- 1
 sum(CEG_grnd)
@@ -115,52 +123,19 @@ sDEG_grnd <- rep(0, nGene)
 sDEG_grnd[ind_sDEG] <- 1
 sum(sDEG_grnd)
 
-#######################################################
+####################################################### 3D plot
 
-###### check result in the ternary plot
-plot_data <- data_grnd
-label <- lbl2
-plot_data <-
-  t(apply(plot_data, 1, function(x) x / sum(x)))
-
-ggtern(data = as.data.frame(plot_data),
-       aes(x=plot_data[,1], y=plot_data[,2], z=plot_data[,3], color = label)) +
-  geom_point() +
-  labs( x = "G1",
-        y = "G2",
-        z = "G3") +
-  scale_color_manual(values=c("blue", "green", "magenta", "orange", "red"))
-
-# length(which(cos_iCEG(data) >= 0.99))
-
-#############################################
-
-##### 3D plot
-# test <- data_grnd
-# rs <- rowSums(test)
-# #test <- test[-which(rs > 1000), ]
-# #coltemp <- lbl2[-which(rs > 1000)]
-# coltemp <- lbl2
-# 
-# coltemp[coltemp == 'sDEG G1'] <- "magenta"
-# coltemp[coltemp == 'sDEG G2'] <- "orange"
-# coltemp[coltemp == 'sDEG G3'] <- "red"
-# coltemp[coltemp == 'iCEG (labeled)'] <- "green4"
-# coltemp[coltemp == '/'] <- "steelblue1"
-# 
-# # Static chart
-# G1 <- test[,1]
-# G2 <- test[,2]
-# G3 <- test[,3]
-# plot3d( G1, G2, G3, col = coltemp, type = "p", r = 0.2)
+plot_3d_data(data_grnd, lbl2, c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green4", "steelblue1"))
 
 #################
 
 #### assume same total count
+
 factor <- 1 / totalcount(data2)$norm_factor
 data2 <- totalcount(data2)$data
 
 #### within group mean
+
 data3 <- NULL
 start <- 1
 for(rep in nRep){
@@ -168,36 +143,11 @@ for(rep in nRep){
   start <- start + rep
 }
 
-plot_data <- data_grnd
-label <- lbl2
-plot_data <-
-  t(apply(plot_data, 1, function(x) x / sum(x)))
+plot_3d_data(data3, lbl2, c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green4", "steelblue1"))
 
-ggtern(data = as.data.frame(plot_data),
-       aes(x=plot_data[,1], y=plot_data[,2], z=plot_data[,3], color = plot_lbl)) +
-  geom_point() +
-  labs( x       = "Group 1",
-        y       = "Group 2",
-        z       = "Group 3") + 
-  scale_color_manual(values=c("blue", "green", "magenta", "orange", "red"))
+plot_ternay_data(data_grnd, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
+plot_ternay_data(data3, lbl2,c("sDEG G1", "sDEG G2", "sDEG G3", "iCEG (labeled)", "/"), c("magenta", "orange", "red", "green", "blue"))
 
-
-ggtern(data = as.data.frame(plot_data),
-       aes(x=plot_data[,1], y=plot_data[,2], z=plot_data[,3], color = label)) +
-  geom_point(alpha = 0.3) +
-  labs( x       = "G1",
-        y       = "G2",
-        z       = "G3") + 
-  scale_color_manual(values=c("green4", "steelblue1", "magenta", "orange", "red")) +
-  theme(
-    title = element_text(size = 12, face = "bold"),
-    axis.title = element_text(size = 12, face = "bold"),
-    legend.text = element_text(size = 12),
-    strip.background = element_blank(),
-    strip.text.x = element_blank(),
-    strip.text.y = element_blank()
-  )
-dev.off()
 ###########################################################
 
 length(which(cos_iCEG(data3) >= 0.99))
