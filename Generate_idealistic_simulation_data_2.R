@@ -91,11 +91,21 @@ data2 <- abs(data2 + noise)
 #                                DEG.foldchange = rep(10, nGroup),
 #                                replicates = nRep)
 # rs <- rowSums(data_TCC$count)
-# move <- c(seq(1,50), 1600 + seq(1,75), 4000 + seq(1, 100))
+# SMG_ratio <- pSMG / sum(pSMG)
+# move <- NULL
+# for(i in 1:length(pSMG)){
+#   if(i == 1){
+#     offset <- 0
+#   } else {
+#     offset <- offset + SMG_ratio[i-1]
+#   }
+#   move <- c(move, floor(nGene * offset) + seq(1, pSMG[i]))
+# }
+# 
 # temp <- rs[move]
 # rs <- c(temp, rs[-move])
-# ind <- which(rs < 10000)
-# # ind <- 1:nGene
+# # ind <- which(rs < 10000)
+# ind <- 1:nGene
 # for(i in ind){
 #   data2[i,] <- data2[i,] * rs[i]
 # }

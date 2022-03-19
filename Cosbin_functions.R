@@ -194,7 +194,7 @@ plot_ternay_data_deprecated <-
       t(apply(plot_data, 1, function(x)
         x / sum(x)))
     
-    ggtern(data = as.data.frame(plot_data),
+    p <- ggtern(data = as.data.frame(plot_data),
            aes(
              x = plot_data[, 1],
              y = plot_data[, 2],
@@ -214,6 +214,8 @@ plot_ternay_data_deprecated <-
         strip.text.x = element_blank(),
         strip.text.y = element_blank()
       )
+    return(p)
+    
   }
 
 
