@@ -1,7 +1,7 @@
 # Cosbin
 
 - `Cosbin_functions.R` houses the cosbin library.
-- Check `toy_exmaple.R` to see how cosbin works step by step.
+- Check `toy_exmaple.R` and `Cosbin toy example.xlsx` to see how cosbin works step by step.
 
 - Full experiment workflow:
   - `generate_idealistic_simulation_data` (or any your data) 
