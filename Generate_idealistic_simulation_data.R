@@ -1,22 +1,3 @@
-#library(ggtern)
-library(Ternary)
-library(hrbrthemes)
-library(ggplot2)
-library(DirichletReg)
-library(DescTools)
-library(TCC)
-library(psych)
-library(scales)
-library(devEMF)
-library(rgl)
-library(magick)
-
-source('Cosbin_functions.R')
-
-set.seed(17)
-
-####################################################
-
 nGroup <- 3
 nGene <- 8 * 1000
 
