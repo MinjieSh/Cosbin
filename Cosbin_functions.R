@@ -20,7 +20,7 @@ cosbin <- function(data) {
     result <- result[-temp_sDEG_ind, ]
     result <- totalcount(result)$data
   }
-  print(dim(result))
+  
   
   # STEP 2: identify CEG, normalize based on CEG
   # converge: # not change
@@ -28,15 +28,11 @@ cosbin <- function(data) {
     temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
     result <- result[temp_CEG_ind,]
     result <- totalcount(result)$data
-    # print(dim(result))
   }
-  print(dim(result))
-  # View(result)
   
   # Final step: normalization
   ind <- as.numeric(row.names(result))
   scalar <- colMeans(data[ind, ] / result)
-  print(scalar)
   for (i in 1:ncol(data)) {
     data[, i] <- data[, i] / scalar[i]
   }
@@ -48,42 +44,17 @@ cosbin <- function(data) {
 #'
 #' @param cosbin_out normalized data, output of the cosbin function
 #' @param data2 original data (with replicates, not in super sample)
-#' @param nGroup number of group, e.g. 3
-#' @param nRep number of replicates in each group, e.g. c(10,20,30)
 #' @return final normalization results
 #' @examples
-#' cosbin_convert(cosbin_out, original_data, 3, c(10, 20, 30))
-cosbin_convert <- function(cosbin_out, data2, nGroup, nRep) {
-  group_factor <- cosbin_out$norm_factor / cosbin_out$norm_factor[1]
-  
-  within_group_factor <- NULL
-  within_group_factor_mean <- NULL
-  
-  start <- 1
-  for (i in 1:nGroup) {
-    temp <-
-      colSums(data2[, start:(start + nRep[i] - 1)]) / sum(data2[, start])
-    within_group_factor_mean <-
-      c(within_group_factor_mean, mean(temp))
-    within_group_factor <- c(within_group_factor, temp)
-    start <- start + nRep[i]
+#' cosbin_convert(cosbin_out, original_data)
+cosbin_convert <- function(cosbin_out, data2) {
+  CEG <- data2[cosbin_out$CEG_index, ]
+  CEG_norm <- totalcount(CEG)
+  factor <- CEG_norm$norm_factor
+  for (i in 1:dim(data2)[2]) {
+    data2[, i] <- data2[, i] /  factor[i]
   }
-  
-  f <- group_factor / within_group_factor_mean
-  f <- f / f[1]
-  
-  f <- rep(f, nRep)
-  f <- f * within_group_factor
-  
-  data_norm <- data2
-  for (i in 1:sum(nRep)) {
-    data_norm[, i] <- data_norm[, i] / f[i]
-  }
-  data_norm <-
-    t(apply(data_norm, 1, function(x)
-      x / sum(x))) * mean(nRep)
-  
-  return(data_norm)
+  return(data2)
 }
 
 
@@ -144,7 +115,7 @@ cos_iDEG <- function(data) {
 
 #' total count normalization
 totalcount <- function(data) {
-  scalar <- colSums(data)
+  scalar <- colSums(data) / mean(colSums(data))
   data <- apply(data, 2, function(x)
     x / sum(x)) * mean(colSums(data))
   
