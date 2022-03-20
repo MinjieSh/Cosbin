@@ -11,4 +11,4 @@
 -> apply `cosbin_convert()` to get the final results
 
 - Fast workflow:
-`Example`
+`Example.R`
