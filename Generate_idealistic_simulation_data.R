@@ -81,9 +81,9 @@ data2 <- abs(data2 + noise)
 ##### modify the rowSums (OPTIONAL)
 
 ### Cosbin rowsum
-# for(i in 1:nGene){
-#   data2[i,] <- data2[i,] * 1000
-# }
+for(i in 1:nGene){
+  data2[i,] <- data2[i,] * 10000
+}
 
 ### TCC rowsum
 # data_TCC <- simulateReadCounts(Ngene = nGene, PDEG = 1 - (piCEG / nGene),
