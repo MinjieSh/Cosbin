@@ -1,5 +1,5 @@
 # Cosbin
-This is the repository of our application: **Cosbin: Cosine score based iterative normalization of biologically diverse samples**
+This is the repository for our application: **Cosbin: Cosine score based iterative normalization of biologically diverse samples**
 
 ## Installation
 1. Clone or download this GitHub repository
