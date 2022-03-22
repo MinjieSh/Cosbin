@@ -13,6 +13,9 @@ source('Cosbin_functions.R')
 # and normalizes the original data accordingly.
 
 
+# Input: dataPure.csv
+# Output: cosbin_normed.csv
+
 
 data <- read.csv('dataPure.csv',row.names=1)
 
