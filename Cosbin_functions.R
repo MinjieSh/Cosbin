@@ -59,7 +59,26 @@ cosbin_convert <- function(cosbin_out, data2) {
 
 
 ########################## helper functions
-
+#' Low/high-expressed genes are filtered by their L2-norm ranks.
+#' @param data Each row is a gene and each column is a sample.
+#' @param thres.low The lower bound of percentage of genes to keep for Cosbin
+#'     with ranked norm. The value should be between 0 and 1.
+#'     The default is 0.05.
+#' @param thres.high The higher bound of percentage of genes to keep for Cosbin
+#'     with ranked norm. The value should be between 0 and 1.
+#'     The default is 1.
+data_cleaning <- function(data, thres.low = 0.05, thres.high = 1){
+  if (thres.low >= thres.high) {
+    stop("thres.low must be smaller than thres.high!")
+  }
+  
+  sigNorm <- apply(data, 1, function(x) norm(matrix(x),"F") )
+  Valid <- sigNorm >= quantile(sigNorm, thres.low) &
+    sigNorm <= quantile(sigNorm, thres.high)
+  data <- data[Valid,]
+  return(data)
+}
+                   
 #' Calculate the cosine between vector A and vector B
 mycosine <- function(A, B) {
   return(sum(A * B) / sqrt(sum(A ^ 2) * sum(B ^ 2)))
