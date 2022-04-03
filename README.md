@@ -12,7 +12,7 @@ This is the repository for our application: **Cosbin: Cosine score based iterati
 - Full experiment workflow:
   - `Generate_idealistic_simulation_data.R` (or any of your data) 
   - If you are using your own data, you'll need to calculate the average of each group as the input of `Cosbin`
-  - Data cleaning (e.g. `data_cleaning()`)
+  - Data cleaning (e.g. `data_cleaning()`) & Initial normalization 
   - Apply `cosbin()` function to the data
   - `evaluation.R` 
   - Apply `cosbin_convert()` to get the final results
