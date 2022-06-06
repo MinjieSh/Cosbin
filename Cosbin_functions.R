@@ -24,8 +24,8 @@ cosbin <- function(data) {
   
   # STEP 2: identify CEG, normalize based on CEG
   # converge: # not change
-  while (length(which(cos_iCEG(result) >= 0.98)) != dim(result)[1]) {
-    temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
+  while (length(which(cos_iCEG(result) >= 0.995)) != dim(result)[1]) {
+    temp_CEG_ind <- which(cos_iCEG(result) >= 0.995)
     result <- result[temp_CEG_ind,]
     result <- totalcount(result)$data
   }
