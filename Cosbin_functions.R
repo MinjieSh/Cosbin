@@ -8,11 +8,7 @@ cosbin <- function(data) {
   result <- data
   row.names(result) <- 1:nrow(result)
   
-  # Step 1: identify sDEG
-  # mycosine(c(1, 0,0), c(1, 1, 1)) = 0.5773503
-  # solve 0.5773503 = 0.99 * x - sin(arccos(x)) * sin(arccos(0.99))
-  
-  #threshold <- 0.686758 #cos(arccos(0.5773503) - arccos(0.99))
+  # Step 1: identify aDEG
   threshold <- 0.728284 #cos(arccos(0.5773503) - arccos(0.98))
   
   while (max(cos_iDEG(result)) >= threshold) {
@@ -22,10 +18,10 @@ cosbin <- function(data) {
   }
   
   
-  # STEP 2: identify CEG, normalize based on CEG
+  # STEP 2: identify iCEG, normalize based on iCEG
   # converge: # not change
-  while (length(which(cos_iCEG(result) >= 0.995)) != dim(result)[1]) {
-    temp_CEG_ind <- which(cos_iCEG(result) >= 0.995)
+  while (length(which(cos_iCEG(result) >= 0.98)) != dim(result)[1]) {
+    temp_CEG_ind <- which(cos_iCEG(result) >= 0.98)
     result <- result[temp_CEG_ind,]
     result <- totalcount(result)$data
   }

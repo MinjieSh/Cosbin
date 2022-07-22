@@ -1,5 +1,5 @@
 # CEG dislocation: cosine_dislocation(data_grnd, CEG_grnd, norm_data_list)
-# DEG dislocation (exclude sDEG): cosine_dislocation(data_grnd, DEG_grnd, norm_data_list)
+# DEG dislocation (exclude aDEG): cosine_dislocation(data_grnd, DEG_grnd, norm_data_list)
 cosine_dislocation <- function(data_grnd, grnd_label, norm_data_list){
   
   number_of_methods <- length(norm_data_list)
@@ -25,7 +25,7 @@ cosine_dislocation <- function(data_grnd, grnd_label, norm_data_list){
   return(table)
 }
 
-# sDEG dislocation: groupwise_cosine_dislocation(data_grnd, norm_data_list, nGroup, pSMG)
+# aDEG dislocation: groupwise_cosine_dislocation(data_grnd, norm_data_list, nGroup, pSMG)
 groupwise_cosine_dislocation <- function(data_grnd, norm_data_list, nGroup, pSMG){
   
   number_of_methods <- length(norm_data_list)
@@ -54,7 +54,7 @@ groupwise_cosine_dislocation <- function(data_grnd, norm_data_list, nGroup, pSMG
 }
 
 # ROC (iCEG vs non-iCEG): ROC(norm_data_list, CEG_grnd, "iCEG", c("red", "green", "blue", "orange", "magenta"))
-# ROC (DEG (exclude SMG) vs non DEG (exclude SMG)) : ROC(norm_data_list, DEG_grnd, "DEG", c("red", "green", "blue", "orange", "magenta"))
+# ROC (DEG vs non DEG) : ROC(norm_data_list, DEG_grnd, "DEG", c("red", "green", "blue", "orange", "magenta"))
 ROC <- function(norm_data_list, grnd_label, option = 'iCEG', color_list) {
   number_of_methods <- length(norm_data_list)
   
@@ -73,15 +73,24 @@ ROC <- function(norm_data_list, grnd_label, option = 'iCEG', color_list) {
       limit <- nGene
       threshold <- 0.15
     } else {
+      
+      # value <-
+      #   sort(cos_iCEG(norm_data_list[[i]]),
+      #        index.return = FALSE,
+      #        decreasing = FALSE)
+
       lst <-
-        sort(cos_iDEG(norm_data_list[[i]]),
+        sort(cos_iCEG(norm_data_list[[i]]),
              index.return = TRUE,
-             decreasing = TRUE)$ix
-      lst <- lst[lst > sum(pSMG)]
+             decreasing = FALSE)$ix
+      
+      #lst <- cbind(value,lst)
+      lst <- lst[which(lst > 600)]
+      
+      limit <- 400
       P <- sum(grnd_label)
-      N <- nGene - sum(pSMG) - P
-      limit <- N + P
-      threshold <- 0.8
+      N <- 400 - P
+      threshold <- 1
     }
     
     res <- NULL
@@ -122,15 +131,14 @@ ROC <- function(norm_data_list, grnd_label, option = 'iCEG', color_list) {
   
   legend(
     "bottomright",
-    legend = c("Total count", "Cosbin", "TMM", "DESeq2", "TCC"),
+    legend = c("Total count", "Cosbin", "CSS", "Qsmooth","DESeq2","TMM/edgeR","DEGES/TCC"),
     col = color_list,
     lty = rep(2, length(norm_data_list)),
-    cex = 0.8
+    cex = 0.65
   )
   
   return(list(FPR_list, TPR_list, AUC_list))
 }
-
 # average_of_pairwise_Log_Fold_Change_Mean_Squared_Error: average_of_pairwise_LFC_MSE(norm_data_list, CEG_grnd, nGroup)
 average_of_pairwise_LFC_MSE <- function(norm_data_list, grnd_label, nGroup){
   number_of_methods <- length(norm_data_list)
