@@ -20,6 +20,9 @@ This is the repository for our application: **Cosbin: Cosine score based iterati
 - Application to real benchmark data:
 `Example.R`
 
+- Additional experiments for comparing Cosbin with CSS and Qsmooth:
+`New experiment.R`
+
 
 ## Paper Overview
 ### Motivation: 
