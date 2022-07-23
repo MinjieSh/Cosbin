@@ -21,7 +21,7 @@ This is the repository for our application: **Cosbin: Cosine score based iterati
 `Example.R`
 
 - Additional experiments for comparing Cosbin with CSS and Qsmooth:
-`New experiment.R`
+`Comparison_Experiment.R`
 
 
 ## Paper Overview
