@@ -10,7 +10,7 @@ This is the repository for our application: **Cosbin: Cosine score based iterati
 - Check `toy_exmaple.R` and `Cosbin toy example.xlsx` to see how `Cosbin` works step by step.
 
 - Full experiment workflow:
-  - `Generate_idealistic_simulation_data.R` (or any of your data) 
+  - `Generate_idealistic_simulation_data_1.R` (or any of your data) 
   - If you are using your own data, you'll need to calculate the average of each group as the input of `Cosbin`
   - Data cleaning (e.g. `data_cleaning()`) & Initial normalization 
   - Apply `cosbin()` function to the data
